@@ -1,0 +1,127 @@
+Relatorio -- Seguranca Informatica 2025/2026
+Trabalho 2 -- Sistema mySaude
+Grupo 016 -- Afonso Paulo, Lourenco Lima, Duarte Alberto
+Data: 4 de Maio de 2026
+
+================================================================================
+1. OBJETIVOS CONCRETIZADOS
+================================================================================
+
+A. Confidencialidade de passwords
+O servidor armazena as passwords no ficheiro "users" usando SHA-256 com salt
+aleatorio de 16 bytes gerado com SecureRandom. O salt e a sintese sao
+codificados em Base64. O formato de cada linha e:
+    username:funcao:salt:sintese
+conforme pedido no enunciado.
+
+B. Integridade do ficheiro de passwords
+O ficheiro "users" e protegido por um HMAC-SHA256 armazenado em "mySaude.mac"
+(codificado em Base64). A chave do MAC e derivada da password do servidor via
+SecretKeySpec. O MAC e verificado no arranque do servidor -- se estiver
+incorreto ou o ficheiro MAC nao existir, o servidor imprime aviso e termina
+imediatamente. O MAC e tambem verificado antes de cada acesso ao ficheiro
+"users" (upload e download) e atualizado sempre que o ficheiro e alterado
+(criacao de utilizador).
+
+C. Criacao de utilizadores
+O programa CriarUser aceita: username funcao password -f certificado.cer.
+Valida a funcao (medico/utente), verifica se o username ja existe, cria a
+diretoria server_storage/<username>/, adiciona o utilizador ao ficheiro "users",
+atualiza o MAC e adiciona o certificado a keystore.users com alias igual ao
+username.
+
+D. Canal seguro (TLS/SSL)
+Toda a comunicacao cliente-servidor usa TLS. O servidor usa
+SSLServerSocketFactory com a keystore do Afonso como keystore TLS. Os clientes
+usam SSLSocketFactory com a mesma keystore como trustStore (definida via a
+variavel de ambiente _JAVA_OPTIONS).
+
+E. Gestao de certificados
+O CriarUser adiciona cada certificado a keystore.users do servidor. Quando o
+cliente precisa de cifrar ou verificar a assinatura de um utilizador cujo
+certificado nao tem localmente, contacta automaticamente o servidor com o
+comando GET_CERT, obtem o certificado em formato X.509 e adiciona-o a sua
+keystore local.
+
+F. Autenticacao e Controlo de acesso
+Em cada pedido ao servidor (upload e download), o cliente envia username e
+password. O servidor autentica verificando o hash SHA-256 com salt. Apenas
+utilizadores com funcao "medico" podem fazer upload; utilizadores "utente"
+recebem mensagem de erro explicita. A comparacao de hashes usa
+MessageDigest.isEqual, que e resistente a timing attacks.
+
+
+================================================================================
+2. PROBLEMAS ENCONTRADOS
+================================================================================
+
+Deadlock nos ObjectStreams:
+Ao inicializar ObjectInputStream e ObjectOutputStream em ambos os lados sem
+ordem consistente, as ligacoes bloqueavam indefinidamente. A solucao foi criar
+sempre o ObjectOutputStream primeiro e chamar flush() imediatamente antes de
+criar o ObjectInputStream no servidor.
+
+Configuracao TLS no Windows:
+As flags -Djavax.net.ssl.trustStore quebravam se copiadas com quebras de linha
+no terminal. Resolvemos definindo a variavel de ambiente _JAVA_OPTIONS uma unica
+vez por sessao em vez de incluir as flags em cada comando java.
+
+Unicidade de ficheiros no servidor:
+A logica de unicidade para ficheiros compostos (.cifrado, .envelope,
+.assinatura.*, .chave.*) foi dificil de acertar. O regex tinha de excluir os
+ficheiros auxiliares (.chave.*, .assinatura.*) da verificacao de conflito, mas
+bloquear corretamente colisoes entre .cifrado e .envelope do mesmo ficheiro
+base.
+
+Piping da password de MAC:
+No Windows CMD o "echo" adiciona um espaco antes do newline, o que corrompia a
+password lida pelo readLine(). A solucao foi usar PowerShell (onde echo e
+Write-Output e nao tem este comportamento).
+
+
+================================================================================
+3. AUTO-AVALIACAO
+================================================================================
+
+Funcionalidade                          Valorizacao     Auto-Avaliacao
+------------------------------------------------------------------------
+A. Confidencialidade de passwords            2               2
+B. Integridade do ficheiro passwords         4               4
+C. Criacao de utilizadores                   3               3
+D. Canal seguro (TLS/SSL)                    3               3
+E. Gestao de certificados                   1+2              3
+F. Autenticacao e Controlo de acesso        2+1              3
+Algoritmos nao seguros (penalizacao)       -1/caso           0
+Relatorio                                    1               1
+Apresentacao                                 1               1
+------------------------------------------------------------------------
+TOTAL                                       20              20
+
+
+================================================================================
+4. ANALISE CRITICA -- FRAQUEZAS E MELHORIAS
+================================================================================
+
+Fraqueza 1 -- Hashing de passwords com SHA-256 simples
+A implementacao usa SHA-256 com salt, que e computacionalmente rapido. Um
+adversario com acesso ao ficheiro "users" pode realizar ataques de forca bruta
+em paralelo usando GPUs. A melhoria seria substituir por
+PBKDF2WithHmacSHA256 (ou bcrypt/Argon2), que sao algoritmos de derivacao de
+chave deliberadamente lentos e configuraveis em custo computacional. Com
+100 000 iteracoes de PBKDF2, o custo de cada tentativa de ataque aumenta em
+varios fatores de magnitude.
+
+Fraqueza 2 -- RSA com padding PKCS#1 v1.5
+A cifra hibrida usa RSA/ECB/PKCS1Padding, que e vulneravel ao ataque de
+Bleichenbacher (1998): um adversario que controle o servidor pode usar respostas
+de erro de padding como um oraculo para decifrar mensagens RSA. A melhoria e
+usar RSA-OAEP (RSA/ECB/OAEPWithSHA-256AndMGF1Padding), o standard atual para
+cifra RSA, que e resistente a este tipo de ataque.
+
+Fraqueza 3 -- AES/CBC sem autenticacao da cifra
+O modo CBC garante confidencialidade mas nao integridade: um adversario pode
+modificar bits do criptograma de forma controlada (bit-flipping attack) ou
+montar um padding oracle attack. A melhoria e usar AES/GCM (Galois/Counter
+Mode), um modo AEAD (Authenticated Encryption with Associated Data) que garante
+simultaneamente confidencialidade e integridade do criptograma, sem custo
+adicional relevante.
