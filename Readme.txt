@@ -27,8 +27,8 @@ NOTAS IMPORTANTES ANTES DE COMECAR:
 
 3. As flags TLS (-Djavax...) podem partir se copiadas com quebras de linha.
    Usar a variavel de ambiente UMA VEZ no inicio de cada sessao do cliente:
-       Linux/Mac: export _JAVA_OPTIONS="-Djavax.net.ssl.trustStore=keystore.afonso -Djavax.net.ssl.trustStorePassword=123456"
-       PowerShell: $env:_JAVA_OPTIONS = "-Djavax.net.ssl.trustStore=keystore.afonso -Djavax.net.ssl.trustStorePassword=123456"
+       Linux/Mac: export _JAVA_OPTIONS="-Djavax.net.ssl.trustStore=keystore.usera -Djavax.net.ssl.trustStorePassword=123456"
+       PowerShell: $env:_JAVA_OPTIONS = "-Djavax.net.ssl.trustStore=keystore.usera -Djavax.net.ssl.trustStorePassword=123456"
    Depois todos os comandos java ja incluem as flags automaticamente.
 
 4. UNICIDADE: o servidor nao aceita duas versoes do mesmo ficheiro base.
@@ -47,39 +47,39 @@ javac -encoding UTF-8 server/PasswordManager.java server/MacManager.java server/
 
 --- PASSO 2: Criar keystores RSA-2048 para todos os utilizadores ---
 
-keytool -genkeypair -alias afonso    -keyalg RSA -keysize 2048 -storetype JKS -keystore keystore.afonso    -validity 365 -storepass 123456 -keypass 123456 -dname "CN=afonso"
-keytool -genkeypair -alias lima      -keyalg RSA -keysize 2048 -storetype JKS -keystore keystore.lima      -validity 365 -storepass 123456 -keypass 123456 -dname "CN=lima"
-keytool -genkeypair -alias duarte    -keyalg RSA -keysize 2048 -storetype JKS -keystore keystore.duarte    -validity 365 -storepass 123456 -keypass 123456 -dname "CN=duarte"
-keytool -genkeypair -alias alexandre -keyalg RSA -keysize 2048 -storetype JKS -keystore keystore.alexandre -validity 365 -storepass 123456 -keypass 123456 -dname "CN=alexandre"
+keytool -genkeypair -alias usera    -keyalg RSA -keysize 2048 -storetype JKS -keystore keystore.usera    -validity 365 -storepass 123456 -keypass 123456 -dname "CN=usera"
+keytool -genkeypair -alias userb      -keyalg RSA -keysize 2048 -storetype JKS -keystore keystore.userb      -validity 365 -storepass 123456 -keypass 123456 -dname "CN=userb"
+keytool -genkeypair -alias userc    -keyalg RSA -keysize 2048 -storetype JKS -keystore keystore.userc    -validity 365 -storepass 123456 -keypass 123456 -dname "CN=userc"
+keytool -genkeypair -alias userd -keyalg RSA -keysize 2048 -storetype JKS -keystore keystore.userd -validity 365 -storepass 123456 -keypass 123456 -dname "CN=userd"
 
 
 --- PASSO 3: Exportar certificados ---
 
-keytool -exportcert -alias afonso    -keystore keystore.afonso    -file afonso.cer    -storepass 123456
-keytool -exportcert -alias lima      -keystore keystore.lima      -file lima.cer      -storepass 123456
-keytool -exportcert -alias duarte    -keystore keystore.duarte    -file duarte.cer    -storepass 123456
-keytool -exportcert -alias alexandre -keystore keystore.alexandre -file alexandre.cer -storepass 123456
+keytool -exportcert -alias usera    -keystore keystore.usera    -file usera.cer    -storepass 123456
+keytool -exportcert -alias userb      -keystore keystore.userb      -file userb.cer      -storepass 123456
+keytool -exportcert -alias userc    -keystore keystore.userc    -file userc.cer    -storepass 123456
+keytool -exportcert -alias userd -keystore keystore.userd -file userd.cer -storepass 123456
 
 
 --- PASSO 4: Importar relacoes de confianca ---
 
-keytool -importcert -alias lima   -file lima.cer   -keystore keystore.afonso    -storepass 123456 -noprompt
-keytool -importcert -alias duarte -file duarte.cer -keystore keystore.afonso    -storepass 123456 -noprompt
-keytool -importcert -alias afonso -file afonso.cer -keystore keystore.lima      -storepass 123456 -noprompt
-keytool -importcert -alias afonso -file afonso.cer -keystore keystore.duarte    -storepass 123456 -noprompt
-keytool -importcert -alias afonso -file afonso.cer -keystore keystore.alexandre -storepass 123456 -noprompt
+keytool -importcert -alias userb   -file userb.cer   -keystore keystore.usera    -storepass 123456 -noprompt
+keytool -importcert -alias userc -file userc.cer -keystore keystore.usera    -storepass 123456 -noprompt
+keytool -importcert -alias usera -file usera.cer -keystore keystore.userb      -storepass 123456 -noprompt
+keytool -importcert -alias usera -file usera.cer -keystore keystore.userc    -storepass 123456 -noprompt
+keytool -importcert -alias usera -file usera.cer -keystore keystore.userd -storepass 123456 -noprompt
 
-    NOTA: Lima NAO importa o cert de Duarte de proposito.
+    NOTA: UserB NAO importa o cert de UserC de proposito.
           O cliente vai busca-lo ao servidor automaticamente quando necessario (Ponto E).
 
 
 --- PASSO 5: Criar utilizadores ---
     (cada comando pede a password de MAC — escrever: macpassword123)
 
-echo macpassword123 | java server.CriarUser afonso medico 123456 -f afonso.cer
-echo macpassword123 | java server.CriarUser lima   medico 123456 -f lima.cer
-echo macpassword123 | java server.CriarUser duarte medico 123456 -f duarte.cer
-echo macpassword123 | java server.CriarUser bob    utente 123456 -f alexandre.cer
+echo macpassword123 | java server.CriarUser usera medico 123456 -f usera.cer
+echo macpassword123 | java server.CriarUser userb   medico 123456 -f userb.cer
+echo macpassword123 | java server.CriarUser userc medico 123456 -f userc.cer
+echo macpassword123 | java server.CriarUser bob    utente 123456 -f userd.cer
 
     Verificar ficheiro criado (deve mostrar formato username:funcao:salt:digest):
     cat server_storage/users
@@ -91,19 +91,19 @@ echo macpassword123 | java server.CriarUser bob    utente 123456 -f alexandre.ce
 
     Verificar certificados na keystore do servidor (Ponto E.1):
     keytool -list -keystore server_storage/keystore.users -storepass mysaude
-    (deve listar 4 entradas: afonso, lima, duarte, bob)
+    (deve listar 4 entradas: usera, userb, userc, bob)
 
 
 --- PASSO 6: Copiar para os PCs cliente (pen drive) ---
 
-    Para PC CLIENTE 1 (Lima):   keystore.afonso  keystore.lima  pasta client/
-    Para PC CLIENTE 2 (Duarte): keystore.afonso  keystore.duarte  pasta client/
+    Para PC CLIENTE 1 (UserB):   keystore.usera  keystore.userb  pasta client/
+    Para PC CLIENTE 2 (UserC): keystore.usera  keystore.userc  pasta client/
 
 
 --- PASSO 7: Arrancar o servidor (fica bloqueado neste terminal) ---
     (pede a password de MAC — escrever: macpassword123)
 
-echo macpassword123 | java server.MySaudeServer 8080 keystore.afonso 123456
+echo macpassword123 | java server.MySaudeServer 8080 keystore.usera 123456
 
     Resultado esperado:
     MAC do ficheiro 'users' verificado com sucesso.
@@ -111,10 +111,10 @@ echo macpassword123 | java server.MySaudeServer 8080 keystore.afonso 123456
 
 
 ================================================================================
-TERMINAL 2 — PC CLIENTE 1 (Lima)
+TERMINAL 2 — PC CLIENTE 1 (UserB)
 ================================================================================
 
-PRE-REQUISITO: ter na pasta keystore.afonso, keystore.lima e pasta client/
+PRE-REQUISITO: ter na pasta keystore.usera, keystore.userb e pasta client/
 
 
 --- PASSO 1: Compilar ---
@@ -125,123 +125,123 @@ javac -encoding UTF-8 client/KeyUtils.java client/CryptoUtils.java client/MySaud
 --- PASSO 2: Definir flags TLS (uma unica vez no inicio da sessao) ---
 
     Linux/Mac:
-    export _JAVA_OPTIONS="-Djavax.net.ssl.trustStore=keystore.afonso -Djavax.net.ssl.trustStorePassword=123456"
+    export _JAVA_OPTIONS="-Djavax.net.ssl.trustStore=keystore.usera -Djavax.net.ssl.trustStorePassword=123456"
 
     Windows PowerShell:
-    $env:_JAVA_OPTIONS="-Djavax.net.ssl.trustStore=keystore.afonso -Djavax.net.ssl.trustStorePassword=123456"
+    $env:_JAVA_OPTIONS="-Djavax.net.ssl.trustStore=keystore.usera -Djavax.net.ssl.trustStorePassword=123456"
 
     Windows CMD:
-    set _JAVA_OPTIONS=-Djavax.net.ssl.trustStore=keystore.afonso -Djavax.net.ssl.trustStorePassword=123456
+    set _JAVA_OPTIONS=-Djavax.net.ssl.trustStore=keystore.usera -Djavax.net.ssl.trustStorePassword=123456
 
 
 --- PASSO 3: Criar ficheiros de teste ---
 
     Linux/Mac:
-    echo "documento simples de lima" > teste_simples.txt
-    echo "documento cifrado de lima" > teste_cifrado.txt
-    echo "documento assinado de lima" > teste_assinado.txt
-    echo "documento envelope de lima" > teste_envelope.txt
+    echo "documento simples de userb" > teste_simples.txt
+    echo "documento cifrado de userb" > teste_cifrado.txt
+    echo "documento assinado de userb" > teste_assinado.txt
+    echo "documento envelope de userb" > teste_envelope.txt
 
     Windows PowerShell:
-    "documento simples de lima" | Out-File -Encoding utf8 teste_simples.txt
-    "documento cifrado de lima" | Out-File -Encoding utf8 teste_cifrado.txt
-    "documento assinado de lima" | Out-File -Encoding utf8 teste_assinado.txt
-    "documento envelope de lima" | Out-File -Encoding utf8 teste_envelope.txt
+    "documento simples de userb" | Out-File -Encoding utf8 teste_simples.txt
+    "documento cifrado de userb" | Out-File -Encoding utf8 teste_cifrado.txt
+    "documento assinado de userb" | Out-File -Encoding utf8 teste_assinado.txt
+    "documento envelope de userb" | Out-File -Encoding utf8 teste_envelope.txt
 
     Windows CMD:
-    echo documento simples de lima > teste_simples.txt
-    echo documento cifrado de lima > teste_cifrado.txt
-    echo documento assinado de lima > teste_assinado.txt
-    echo documento envelope de lima > teste_envelope.txt
+    echo documento simples de userb > teste_simples.txt
+    echo documento cifrado de userb > teste_cifrado.txt
+    echo documento assinado de userb > teste_assinado.txt
+    echo documento envelope de userb > teste_envelope.txt
 
 
 --- PASSO 4: Operacoes locais (sem servidor) ---
 
     Assinar (-a):
-    java client.MySaude -u lima -p 123456 -a teste_simples.txt
-    (cria: teste_simples.txt.assinatura.lima)
+    java client.MySaude -u userb -p 123456 -a teste_simples.txt
+    (cria: teste_simples.txt.assinatura.userb)
 
     Verificar assinatura propria (-v):
-    java client.MySaude -u lima -p 123456 -t lima -v teste_simples.txt
+    java client.MySaude -u userb -p 123456 -t userb -v teste_simples.txt
     (esperado: Assinatura valida para teste_simples.txt)
 
     Cifrar para si propria (-c) e decifrar (-d):
-    java client.MySaude -u lima -p 123456 -t lima -c teste_simples.txt
-    java client.MySaude -u lima -p 123456 -d teste_simples.txt.cifrado
+    java client.MySaude -u userb -p 123456 -t userb -c teste_simples.txt
+    java client.MySaude -u userb -p 123456 -d teste_simples.txt.cifrado
     (cria: teste_simples.txt.decifrado — conteudo identico ao original)
 
 
---- PASSO 5: Enviar ficheiro simples para Duarte (-e) ---
+--- PASSO 5: Enviar ficheiro simples para UserC (-e) ---
 
-java client.MySaude -s IP_SERVIDOR:8080 -u lima -p 123456 -t duarte -e teste_simples.txt
+java client.MySaude -s IP_SERVIDOR:8080 -u userb -p 123456 -t userc -e teste_simples.txt
 (esperado: UPLOAD teste_simples.txt: OK)
 
 
---- PASSO 6: Cifrar e enviar para Duarte (-ce) ---
-    Lima nao tem o cert de Duarte — vai busca-lo ao servidor automaticamente (Ponto E)
+--- PASSO 6: Cifrar e enviar para UserC (-ce) ---
+    UserB nao tem o cert de UserC — vai busca-lo ao servidor automaticamente (Ponto E)
 
-java client.MySaude -s IP_SERVIDOR:8080 -u lima -p 123456 -t duarte -ce teste_cifrado.txt
-(esperado: "Certificado de 'duarte' obtido do servidor..." + UPLOAD OK)
-
-
---- PASSO 7: Assinar, cifrar e enviar para Duarte (-ae) ---
-
-java client.MySaude -s IP_SERVIDOR:8080 -u lima -p 123456 -t duarte -ae teste_assinado.txt
-(esperado: 3 uploads OK — .cifrado, .chave.duarte, .assinatura.lima)
+java client.MySaude -s IP_SERVIDOR:8080 -u userb -p 123456 -t userc -ce teste_cifrado.txt
+(esperado: "Certificado de 'userc' obtido do servidor..." + UPLOAD OK)
 
 
---- PASSO 8: Envelope seguro para Duarte (-ace) ---
+--- PASSO 7: Assinar, cifrar e enviar para UserC (-ae) ---
 
-java client.MySaude -s IP_SERVIDOR:8080 -u lima -p 123456 -t duarte -ace teste_envelope.txt
-(esperado: 3 uploads OK — .envelope, .chave.duarte, .assinatura.lima)
+java client.MySaude -s IP_SERVIDOR:8080 -u userb -p 123456 -t userc -ae teste_assinado.txt
+(esperado: 3 uploads OK — .cifrado, .chave.userc, .assinatura.userb)
 
 
---- PASSO 9: Receber ficheiro simples enviado por Duarte (-r) ---
-    (ESPERAR que Duarte execute o Passo 5 do Terminal 3 primeiro)
+--- PASSO 8: Envelope seguro para UserC (-ace) ---
 
-java client.MySaude -s IP_SERVIDOR:8080 -u lima -p 123456 -r teste_simples.txt
+java client.MySaude -s IP_SERVIDOR:8080 -u userb -p 123456 -t userc -ace teste_envelope.txt
+(esperado: 3 uploads OK — .envelope, .chave.userc, .assinatura.userb)
+
+
+--- PASSO 9: Receber ficheiro simples enviado por UserC (-r) ---
+    (ESPERAR que UserC execute o Passo 5 do Terminal 3 primeiro)
+
+java client.MySaude -s IP_SERVIDOR:8080 -u userb -p 123456 -r teste_simples.txt
 (cria: recebido_teste_simples.txt)
 
 
---- PASSO 10: Receber e decifrar o que Duarte enviou (-rd) ---
-    (ESPERAR que Duarte execute o Passo 6 do Terminal 3 primeiro)
+--- PASSO 10: Receber e decifrar o que UserC enviou (-rd) ---
+    (ESPERAR que UserC execute o Passo 6 do Terminal 3 primeiro)
 
-java client.MySaude -s IP_SERVIDOR:8080 -u lima -p 123456 -rd teste_cifrado.txt
+java client.MySaude -s IP_SERVIDOR:8080 -u userb -p 123456 -rd teste_cifrado.txt
 (cria: teste_cifrado.txt.decifrado)
 
 
---- PASSO 11: Receber, decifrar e verificar assinatura de Duarte (-rv) ---
-    (ESPERAR que Duarte execute o Passo 7 do Terminal 3 primeiro)
-    Lima nao tem o cert de Duarte — vai busca-lo ao servidor automaticamente (Ponto E)
+--- PASSO 11: Receber, decifrar e verificar assinatura de UserC (-rv) ---
+    (ESPERAR que UserC execute o Passo 7 do Terminal 3 primeiro)
+    UserB nao tem o cert de UserC — vai busca-lo ao servidor automaticamente (Ponto E)
 
-java client.MySaude -s IP_SERVIDOR:8080 -u lima -p 123456 -t duarte -rv teste_assinado.txt
-(esperado: "Certificado de 'duarte' obtido do servidor..." + "Assinatura valida (rv)")
+java client.MySaude -s IP_SERVIDOR:8080 -u userb -p 123456 -t userc -rv teste_assinado.txt
+(esperado: "Certificado de 'userc' obtido do servidor..." + "Assinatura valida (rv)")
 
 
---- PASSO 12: Abrir envelope seguro de Duarte (-rdv) ---
-    (ESPERAR que Duarte execute o Passo 8 do Terminal 3 primeiro)
+--- PASSO 12: Abrir envelope seguro de UserC (-rdv) ---
+    (ESPERAR que UserC execute o Passo 8 do Terminal 3 primeiro)
 
-java client.MySaude -s IP_SERVIDOR:8080 -u lima -p 123456 -t duarte -rdv teste_envelope.txt
+java client.MySaude -s IP_SERVIDOR:8080 -u userb -p 123456 -t userc -rdv teste_envelope.txt
 (esperado: Envelope seguro valido (rdv))
 
 
 --- PASSO 13: Demonstrar controlo de acesso (bob e utente, nao pode enviar) ---
 
-java client.MySaude -s IP_SERVIDOR:8080 -u bob -p 123456 -t duarte -e teste_simples.txt
+java client.MySaude -s IP_SERVIDOR:8080 -u bob -p 123456 -t userc -e teste_simples.txt
 (esperado: ERRO — Acesso negado. Apenas utilizadores com funcao 'medico' podem enviar)
 
 
 --- PASSO 14: Demonstrar autenticacao com password errada ---
 
-java client.MySaude -s IP_SERVIDOR:8080 -u lima -p ERRADA -t duarte -e teste_simples.txt
-(esperado: ERRO — Autenticacao falhou para o utilizador 'lima')
+java client.MySaude -s IP_SERVIDOR:8080 -u userb -p ERRADA -t userc -e teste_simples.txt
+(esperado: ERRO — Autenticacao falhou para o utilizador 'userb')
 
 
 ================================================================================
-TERMINAL 3 — PC CLIENTE 2 (Duarte)
+TERMINAL 3 — PC CLIENTE 2 (UserC)
 ================================================================================
 
-PRE-REQUISITO: ter na pasta keystore.afonso, keystore.duarte e pasta client/
+PRE-REQUISITO: ter na pasta keystore.usera, keystore.userc e pasta client/
 
 
 --- PASSO 1: Compilar ---
@@ -252,98 +252,98 @@ javac -encoding UTF-8 client/KeyUtils.java client/CryptoUtils.java client/MySaud
 --- PASSO 2: Definir flags TLS (uma unica vez no inicio da sessao) ---
 
     Linux/Mac:
-    export _JAVA_OPTIONS="-Djavax.net.ssl.trustStore=keystore.afonso -Djavax.net.ssl.trustStorePassword=123456"
+    export _JAVA_OPTIONS="-Djavax.net.ssl.trustStore=keystore.usera -Djavax.net.ssl.trustStorePassword=123456"
 
     Windows PowerShell:
-    $env:_JAVA_OPTIONS="-Djavax.net.ssl.trustStore=keystore.afonso -Djavax.net.ssl.trustStorePassword=123456"
+    $env:_JAVA_OPTIONS="-Djavax.net.ssl.trustStore=keystore.usera -Djavax.net.ssl.trustStorePassword=123456"
 
     Windows CMD:
-    set _JAVA_OPTIONS=-Djavax.net.ssl.trustStore=keystore.afonso -Djavax.net.ssl.trustStorePassword=123456
+    set _JAVA_OPTIONS=-Djavax.net.ssl.trustStore=keystore.usera -Djavax.net.ssl.trustStorePassword=123456
 
 
 --- PASSO 3: Criar ficheiros de teste ---
 
     Linux/Mac:
-    echo "documento simples de duarte" > teste_simples.txt
-    echo "documento cifrado de duarte" > teste_cifrado.txt
-    echo "documento assinado de duarte" > teste_assinado.txt
-    echo "documento envelope de duarte" > teste_envelope.txt
+    echo "documento simples de userc" > teste_simples.txt
+    echo "documento cifrado de userc" > teste_cifrado.txt
+    echo "documento assinado de userc" > teste_assinado.txt
+    echo "documento envelope de userc" > teste_envelope.txt
 
     Windows PowerShell:
-    "documento simples de duarte" | Out-File -Encoding utf8 teste_simples.txt
-    "documento cifrado de duarte" | Out-File -Encoding utf8 teste_cifrado.txt
-    "documento assinado de duarte" | Out-File -Encoding utf8 teste_assinado.txt
-    "documento envelope de duarte" | Out-File -Encoding utf8 teste_envelope.txt
+    "documento simples de userc" | Out-File -Encoding utf8 teste_simples.txt
+    "documento cifrado de userc" | Out-File -Encoding utf8 teste_cifrado.txt
+    "documento assinado de userc" | Out-File -Encoding utf8 teste_assinado.txt
+    "documento envelope de userc" | Out-File -Encoding utf8 teste_envelope.txt
 
     Windows CMD:
-    echo documento simples de duarte > teste_simples.txt
-    echo documento cifrado de duarte > teste_cifrado.txt
-    echo documento assinado de duarte > teste_assinado.txt
-    echo documento envelope de duarte > teste_envelope.txt
+    echo documento simples de userc > teste_simples.txt
+    echo documento cifrado de userc > teste_cifrado.txt
+    echo documento assinado de userc > teste_assinado.txt
+    echo documento envelope de userc > teste_envelope.txt
 
 
---- PASSO 4: Receber ficheiro simples enviado por Lima (-r) ---
-    (ESPERAR que Lima execute o Passo 5 do Terminal 2 primeiro)
+--- PASSO 4: Receber ficheiro simples enviado por UserB (-r) ---
+    (ESPERAR que UserB execute o Passo 5 do Terminal 2 primeiro)
 
-java client.MySaude -s IP_SERVIDOR:8080 -u duarte -p 123456 -r teste_simples.txt
+java client.MySaude -s IP_SERVIDOR:8080 -u userc -p 123456 -r teste_simples.txt
 (cria: recebido_teste_simples.txt)
 
 
---- PASSO 5: Enviar ficheiro simples para Lima (-e) ---
+--- PASSO 5: Enviar ficheiro simples para UserB (-e) ---
 
-java client.MySaude -s IP_SERVIDOR:8080 -u duarte -p 123456 -t lima -e teste_simples.txt
+java client.MySaude -s IP_SERVIDOR:8080 -u userc -p 123456 -t userb -e teste_simples.txt
 (esperado: UPLOAD teste_simples.txt: OK)
 
 
---- PASSO 6: Receber e decifrar o que Lima enviou (-rd) ---
-    (ESPERAR que Lima execute o Passo 6 do Terminal 2 primeiro)
+--- PASSO 6: Receber e decifrar o que UserB enviou (-rd) ---
+    (ESPERAR que UserB execute o Passo 6 do Terminal 2 primeiro)
 
-java client.MySaude -s IP_SERVIDOR:8080 -u duarte -p 123456 -rd teste_cifrado.txt
+java client.MySaude -s IP_SERVIDOR:8080 -u userc -p 123456 -rd teste_cifrado.txt
 (cria: teste_cifrado.txt.decifrado)
 
 
---- PASSO 7: Receber, decifrar e verificar assinatura de Lima (-rv) ---
-    (ESPERAR que Lima execute o Passo 7 do Terminal 2 primeiro)
-    Duarte nao tem o cert de Lima — vai busca-lo ao servidor automaticamente (Ponto E)
+--- PASSO 7: Receber, decifrar e verificar assinatura de UserB (-rv) ---
+    (ESPERAR que UserB execute o Passo 7 do Terminal 2 primeiro)
+    UserC nao tem o cert de UserB — vai busca-lo ao servidor automaticamente (Ponto E)
 
-java client.MySaude -s IP_SERVIDOR:8080 -u duarte -p 123456 -t lima -rv teste_assinado.txt
-(esperado: "Certificado de 'lima' obtido do servidor..." + "Assinatura valida (rv)")
+java client.MySaude -s IP_SERVIDOR:8080 -u userc -p 123456 -t userb -rv teste_assinado.txt
+(esperado: "Certificado de 'userb' obtido do servidor..." + "Assinatura valida (rv)")
 
 
---- PASSO 8: Abrir envelope seguro de Lima (-rdv) ---
-    (ESPERAR que Lima execute o Passo 8 do Terminal 2 primeiro)
+--- PASSO 8: Abrir envelope seguro de UserB (-rdv) ---
+    (ESPERAR que UserB execute o Passo 8 do Terminal 2 primeiro)
 
-java client.MySaude -s IP_SERVIDOR:8080 -u duarte -p 123456 -t lima -rdv teste_envelope.txt
+java client.MySaude -s IP_SERVIDOR:8080 -u userc -p 123456 -t userb -rdv teste_envelope.txt
 (esperado: Envelope seguro valido (rdv))
 
 
---- PASSO 9: Cifrar e enviar para Lima (-ce) ---
-    Duarte nao tem o cert de Lima — vai busca-lo ao servidor automaticamente (Ponto E)
+--- PASSO 9: Cifrar e enviar para UserB (-ce) ---
+    UserC nao tem o cert de UserB — vai busca-lo ao servidor automaticamente (Ponto E)
 
-java client.MySaude -s IP_SERVIDOR:8080 -u duarte -p 123456 -t lima -ce teste_cifrado.txt
-(esperado: "Certificado de 'lima' obtido do servidor..." + UPLOAD OK)
+java client.MySaude -s IP_SERVIDOR:8080 -u userc -p 123456 -t userb -ce teste_cifrado.txt
+(esperado: "Certificado de 'userb' obtido do servidor..." + UPLOAD OK)
 
 
---- PASSO 10: Assinar, cifrar e enviar para Lima (-ae) ---
+--- PASSO 10: Assinar, cifrar e enviar para UserB (-ae) ---
 
-java client.MySaude -s IP_SERVIDOR:8080 -u duarte -p 123456 -t lima -ae teste_assinado.txt
+java client.MySaude -s IP_SERVIDOR:8080 -u userc -p 123456 -t userb -ae teste_assinado.txt
 (esperado: 3 uploads OK)
 
 
---- PASSO 11: Envelope seguro para Lima (-ace) ---
+--- PASSO 11: Envelope seguro para UserB (-ace) ---
 
-java client.MySaude -s IP_SERVIDOR:8080 -u duarte -p 123456 -t lima -ace teste_envelope.txt
+java client.MySaude -s IP_SERVIDOR:8080 -u userc -p 123456 -t userb -ace teste_envelope.txt
 (esperado: 3 uploads OK)
 
 
 --- PASSO 12: Operacoes locais (sem servidor) ---
 
     Assinar (-a):
-    java client.MySaude -u duarte -p 123456 -a teste_simples.txt
+    java client.MySaude -u userc -p 123456 -a teste_simples.txt
 
     Cifrar para si proprio (-c) e decifrar (-d):
-    java client.MySaude -u duarte -p 123456 -t duarte -c teste_simples.txt
-    java client.MySaude -u duarte -p 123456 -d teste_simples.txt.cifrado
+    java client.MySaude -u userc -p 123456 -t userc -c teste_simples.txt
+    java client.MySaude -u userc -p 123456 -d teste_simples.txt.cifrado
 
 
 ================================================================================
@@ -360,7 +360,7 @@ cat server_storage/users
 --- Ponto B: MAC errado no arranque (servidor deve terminar imediatamente) ---
 (porta 9999 apenas para demonstracao, nao afeta o servidor real na 8080)
 
-echo MAC_ERRADA | java server.MySaudeServer 9999 keystore.afonso 123456
+echo MAC_ERRADA | java server.MySaudeServer 9999 keystore.usera 123456
 (esperado: AVISO DE SEGURANCA: O MAC do ficheiro de passwords esta INCORRETO!
            O ficheiro 'users' pode ter sido adulterado. A terminar o servidor.)
 
@@ -370,12 +370,12 @@ echo MAC_ERRADA | java server.MySaudeServer 9999 keystore.afonso 123456
 
     Linux/Mac:
     mv server_storage/mySaude.mac server_storage/mySaude.mac.bak
-    echo MAC_QUALQUER | java server.MySaudeServer 9999 keystore.afonso 123456
+    echo MAC_QUALQUER | java server.MySaudeServer 9999 keystore.usera 123456
     mv server_storage/mySaude.mac.bak server_storage/mySaude.mac
 
     Windows PowerShell:
     Rename-Item server_storage\mySaude.mac server_storage\mySaude.mac.bak
-    echo MAC_QUALQUER | java server.MySaudeServer 9999 keystore.afonso 123456
+    echo MAC_QUALQUER | java server.MySaudeServer 9999 keystore.usera 123456
     Rename-Item server_storage\mySaude.mac.bak server_storage\mySaude.mac
 
 (esperado: AVISO DE SEGURANCA: Ficheiro de MAC (mySaude.mac) nao encontrado!
@@ -384,11 +384,11 @@ echo MAC_ERRADA | java server.MySaudeServer 9999 keystore.afonso 123456
 
 --- Ponto C: Username ja existente (deve dar erro) ---
 
-echo macpassword123 | java server.CriarUser afonso medico 123456 -f afonso.cer
-(esperado: Erro: o utilizador 'afonso' ja existe.)
+echo macpassword123 | java server.CriarUser usera medico 123456 -f usera.cer
+(esperado: Erro: o utilizador 'usera' ja existe.)
 
 
 --- Ponto C: Funcao invalida (deve dar erro) ---
 
-java server.CriarUser novo enfermeiro 123456 -f afonso.cer
+java server.CriarUser novo enfermeiro 123456 -f usera.cer
 (esperado: Erro: funcao invalida 'enfermeiro'. Use 'medico' ou 'utente'.)

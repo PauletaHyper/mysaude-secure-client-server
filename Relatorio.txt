@@ -1,6 +1,6 @@
 Relatorio -- Seguranca Informatica 2025/2026
 Trabalho 2 -- Sistema mySaude
-Grupo 016 -- Afonso Paulo, Lourenco Lima, Duarte Alberto
+Grupo 016
 Data: 4 de Maio de 2026
 
 ================================================================================
