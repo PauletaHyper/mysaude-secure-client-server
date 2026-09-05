@@ -1,0 +1,32 @@
+# ============================================================
+#  Regras Snort MySaude — Trabalho 3, Parte II
+#  Segurança Informática 2025/26
+# ============================================================
+#
+#  $HOME_NET deve ser definido em mysaude_snort.conf
+#  (sub-rede do servidor, ex: 10.101.84.0/23)
+#
+# ============================================================
+
+# S1 — Varrimento de portos (port scan)
+# Gera alerta a cada 6 ligações TCP SYN para portos < 2048 em 2 minutos.
+# track by_dst: conta ligações de qualquer origem para o servidor.
+# type threshold: dispara a cada 6 pacotes (não apenas no primeiro grupo).
+# flow:stateless: evita interferência do preprocessador stream5 na contagem de SYN.
+# Threshold definido como diretiva separada em mysaude_snort.conf (keyword inline é deprecated).
+alert tcp any any -> $HOME_NET [1:2047] (msg:"[S1] Port Scan: 6 TCP SYN para portos<2048 em 2min"; flags:S; flow:stateless; sid:1000001; rev:1;)
+
+# S2 — Brute-force ao servidor mySaude (porta 8080)
+# Gera 1 alerta único após 7 ligações do mesmo IP para a porta 8080 em 30 segundos.
+# track by_src: conta ligações de cada IP individualmente.
+# type both: dispara no 7.º pacote e fica silencioso pelo resto da janela (1 alerta/janela).
+# flow:stateless: garante contagem de SYN mesmo com stream5 ativo (nc -z não completa handshake).
+# Threshold definido como diretiva separada em mysaude_snort.conf (keyword inline é deprecated).
+alert tcp any any -> $HOME_NET 8080 (msg:"[S2] Brute Force mySaude: 7 ligacoes do mesmo IP em 30s"; flags:S; flow:stateless; sid:1000002; rev:1;)
+
+# S3 — Flood ICMP echo-request (ping)
+# Gera alerta apenas para os primeiros 5 pings em 45 segundos; os restantes são ignorados.
+# track by_dst: conta todos os pings recebidos no servidor (qualquer origem).
+# type limit: dispara no máximo 5 vezes por intervalo.
+# Threshold definido como diretiva separada em mysaude_snort.conf (keyword inline é deprecated).
+alert icmp any any -> $HOME_NET any (msg:"[S3] ICMP Echo Request (primeiros 5 em 45s)"; itype:8; sid:1000003; rev:1;)

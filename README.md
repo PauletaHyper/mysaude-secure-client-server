@@ -1,6 +1,12 @@
 # MySaude — Cliente/Servidor Seguro
 
-Sistema cliente/servidor em Java para troca segura de ficheiros clínicos, desenvolvido como projeto de Segurança Informática (FCUL). Implementa autenticação, controlo de acesso por perfil, e um conjunto completo de operações criptográficas ponto-a-ponto — assinatura digital, cifra, e "envelope digital" (cifra + assinatura + troca de chave).
+Sistema cliente/servidor em Java para troca segura de ficheiros clínicos, desenvolvido em 3 fases como projeto de Segurança Informática (FCUL). Implementa autenticação, controlo de acesso por perfil, um conjunto completo de operações criptográficas ponto-a-ponto (assinatura digital, cifra, "envelope digital"), e proteção de rede ao nível do sistema operativo (firewall + deteção de intrusão).
+
+## Fases do projeto
+
+1. **Aplicação cliente/servidor segura** (raiz do repositório) — TLS, autenticação, controlo de acesso, criptografia
+2. **Reforço e correção** (ver secções abaixo) — deteção de adulteração de dados, revisão de vulnerabilidades
+3. **[Segurança de rede](./fase3-network-security)** — firewall com `iptables` e deteção de intrusão com `snort`
 
 ## Funcionalidades de segurança
 
